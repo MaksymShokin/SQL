@@ -7,7 +7,7 @@ const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const noPageFoundController = require('./controllers/404');
 
-const db = require('./helpers/database');
+const sequelize = require('./helpers/database');
 
 const app = express();
 
@@ -26,8 +26,16 @@ app.use(shopRoutes);
 
 app.use(noPageFoundController.get404);
 
-app.listen(3000);
+sequelize
+  .sync()
+  .then(result => {
+    console.log(result);
+    app.listen(3000);
+  })
+  .catch(err => console.log(err))
+
 
 // templating engines
 // npm install ejs pug express-handlebars
 // npm install --save mysql2
+// npm install --save sequelize
