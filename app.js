@@ -8,6 +8,8 @@ const shopRoutes = require('./routes/shop');
 const noPageFoundController = require('./controllers/404');
 
 const sequelize = require('./helpers/database');
+const Product = require('./models/product');
+const User = require('./models/user');
 
 const app = express();
 
@@ -26,7 +28,12 @@ app.use(shopRoutes);
 
 app.use(noPageFoundController.get404);
 
+Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE' });
+User.hasMany(Product)
+
 sequelize
+  // create new table
+  // .sync({ force: true })
   .sync()
   .then(result => {
     app.listen(3000);
