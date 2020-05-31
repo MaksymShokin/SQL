@@ -3,7 +3,7 @@ const Product = require('../models/product');
 exports.getAddProduct = (req, res, next) => {
   res.render('admin/edit-product', {
     title: 'Add product',
-    path: 'admin/add-product',
+    path: '/admin/add-product',
     editing: false
   });
 };
@@ -25,21 +25,22 @@ exports.postAddProduct = (req, res, next) => {
 
 exports.getEditProduct = (req, res, next) => {
   const isEditMode = req.query.edit;
-
   const productId = req.params.productId;
 
-  Product.getById(productId, (product) => {
-    if (!product) {
-      return res.redirect('/');
-    }
+  Product.findByPk(productId)
+    .then(product => {
+      if (!product) {
+        return res.redirect('/');
+      }
 
-    res.render('admin/edit-product', {
-      title: 'Edit product',
-      path: 'admin/edit-product',
-      editing: isEditMode,
-      product: product
-    });
-  })
+      res.render('admin/edit-product', {
+        title: 'Edit product',
+        path: 'admin/edit-product',
+        editing: isEditMode,
+        product: product
+      });
+    })
+    .catch(err => console.log(err))
 };
 
 exports.postEditProduct = (req, res, next) => {
@@ -48,11 +49,18 @@ exports.postEditProduct = (req, res, next) => {
   const updatedImageUrl = req.body.imageUrl;
   const updatedPrice = req.body.price;
   const updatedDescription = req.body.description;
-  const updatedProduct = new Product(prodId, updatedTitle, updatedImageUrl, updatedPrice, updatedDescription);
-
-  updatedProduct.save();
-
-  res.redirect('/admin/products')
+  
+  Product.findByPk(prodId)
+    .then(product => {
+      product.title = updatedTitle;
+      product.imageUrl = updatedImageUrl;
+      product.price = updatedPrice;
+      product.description = updatedDescription;
+      return product.save()
+    })
+    .then(() => console.log('Updated product'))
+    .finally(() => res.redirect('/admin/products'))
+    .catch(err => console.log(err))    
 }
 
 exports.postDeleteProduct = (req, res, next) => {
@@ -68,7 +76,7 @@ exports.getProducts = (req, res, next) => {
     res.render('admin/products', {
       title: 'Products',
       products: products,
-      path: 'admin/products',
+      path: '/admin/products',
       productCSS: true,
       formsCSS: true,
       activeAddProduct: true
