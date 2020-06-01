@@ -23,9 +23,6 @@ app.set('views', 'views');
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/admin', adminRoutes);
-app.use(shopRoutes);
-
 app.use((req, res, next) => {
   User.findByPk(1)
     .then(user => {
@@ -35,6 +32,8 @@ app.use((req, res, next) => {
     .catch(err => console.log(err))
 });
 
+app.use('/admin', adminRoutes);
+app.use(shopRoutes);
 app.use(noPageFoundController.get404);
 
 Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE' });
